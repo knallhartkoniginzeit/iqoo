@@ -1,0 +1,18 @@
+budgets:
+  - key_hash: "dev-sandbox-key"
+    label: "eng-team-sandbox"
+    daily_limit_usd: 20.00
+    hard_block: true
+
+  - key_hash: "prod-main-key"
+    label: "prod-main"
+    daily_limit_usd: 500.00
+    hard_block: true
+
+defaults:
+  daily_limit_usd: 5.00
+  hard_block: true
+
+config:
+  fail_mode: closed
+  verbose: false

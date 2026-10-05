@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Token Cost Guard</title>
+    <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <span class="logo">TCG</span>
+            <div>
+                <h1>Token Cost Guard</h1>
+                <div class="conn" id="conn">
+                    <span class="dot" id="connDot"></span>
+                    <span id="connText">Connecting...</span>
+                </div>
+            </div>
+            <button id="settingsBtn" title="Settings">Settings</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="totals" id="totals">
+            <div class="total-card">
+                <div class="total-label">Spent Today</div>
+                <div class="total-value" id="spentToday">$0.00</div>
+            </div>
+            <div class="total-card">
+                <div class="total-label">Requests</div>
+                <div class="total-value" id="totalRequests">0</div>
+            </div>
+            <div class="total-card">
+                <div class="total-label">Est. Cost (24h)</div>
+                <div class="total-value" id="totalCost">$0.00</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Budgets</h2>
+            <div id="budgets" class="stack">
+                <div class="empty">No keys seen yet.</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>By Model</h2>
+            <div id="models" class="stack">
+                <div class="empty">No spend data yet.</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Recent Requests</h2>
+            <table class="ledger">
+                <thead>
+                    <tr><th>Time</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Status</th></tr>
+                </thead>
+                <tbody id="ledgerBody">
+                    <tr><td colspan="5" class="empty">Waiting for requests...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer id="footer">
+        Polling <span id="footerUrl">proxy</span> every <span id="footerInterval">5</span>s ·
+        <a href="#" id="optionsLink">settings</a>
+    </footer>
+
+    <script src="sidepanel.js"></script>
+</body>
+</html>

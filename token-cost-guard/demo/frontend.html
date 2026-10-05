@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Token Cost Guard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-elevated: #ffffff;
+            --fg: #09090b;
+            --fg-muted: #52525b;
+            --fg-subtle: #71717a;
+            --border: #e4e4e7;
+            --border-strong: #09090b;
+            --input-bg: #ffffff;
+            --input-border: #d4d4d8;
+            --input-focus: #09090b;
+            --btn-primary-bg: #09090b;
+            --btn-primary-fg: #ffffff;
+            --btn-primary-hover: #27272a;
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --error: #b91c1c;
+            --error-bg: #fef2f2;
+            --error-border: #fecaca;
+            --warn: #b45309;
+            --warn-bg: #fffbeb;
+            --warn-border: #fde68a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .site-header {
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 24px;
+            height: 24px;
+            background: var(--fg);
+            color: var(--bg);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .brand-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--fg);
+            text-decoration: none;
+        }
+
+        .brand-badge {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 7px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--fg-muted);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--fg-muted);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--fg);
+            border-color: var(--border);
+            background: var(--bg-subtle);
+        }
+
+        .nav-link.active {
+            color: var(--fg);
+            background: var(--bg-subtle);
+            border-color: var(--border);
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        .page-intro {
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-heading {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--fg);
+            margin-bottom: 6px;
+        }
+
+        .page-description {
+            font-size: 14px;
+            color: var(--fg-muted);
+            max-width: 720px;
+        }
+
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .metric-cell {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 16px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-subtle);
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--fg);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pipeline-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+        }
+
+        .pipeline-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--fg-subtle);
+            margin-bottom: 12px;
+        }
+
+        .pipeline-steps {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .step-num {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--fg-subtle);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .step-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--fg);
+        }
+
+        .step-tag {
+            font-size: 10px;
+            color: var(--fg-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .section-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-card-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg);
+        }
+
+        .section-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg);
+        }
+
+        .section-card-body {
+            padding: 18px;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg);
+            letter-spacing: -0.01em;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            color: var(--fg);
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 1px var(--input-focus);
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.45;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-fg);
+            width: 100%;
+            border-color: var(--btn-primary-bg);
+        }
+
+        .btn-primary:hover {
+            background: var(--btn-primary-hover);
+            border-color: var(--btn-primary-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .scenarios-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px 18px;
+            margin-bottom: 28px;
+        }
+
+        .scenarios-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-subtle);
+            margin-bottom: 12px;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .scenario-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            padding: 9px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .scenario-btn:hover {
+            background: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        .scenario-btn.danger {
+            border-color: var(--error-border);
+            color: var(--error);
+        }
+
+        .scenario-btn.danger:hover {
+            background: var(--error-bg);
+            border-color: var(--error);
+        }
+
+        .scenario-btn.warn {
+            border-color: var(--warn-border);
+            color: var(--warn);
+        }
+
+        .scenario-btn.warn:hover {
+            background: var(--warn-bg);
+            border-color: var(--warn);
+        }
+
+        .scenario-btn.success {
+            border-color: var(--success-border);
+            color: var(--success);
+        }
+
+        .scenario-btn.success:hover {
+            background: var(--success-bg);
+            border-color: var(--success);
+        }
+
+        .response-container {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .response-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-subtle);
+        }
+
+        .response-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-muted);
+        }
+
+        .result-status {
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+        }
+
+        .status-200 {
+            background: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success);
+        }
+
+        .status-402 {
+            background: var(--error-bg);
+            border-color: var(--error-border);
+            color: var(--error);
+        }
+
+        .status-4xx {
+            background: var(--warn-bg);
+            border-color: var(--warn-border);
+            color: var(--warn);
+        }
+
+        .response-body {
+            padding: 18px;
+            max-height: 380px;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--fg);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .ledger-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .ledger-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ledger-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-muted);
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .ledger-table th {
+            text-align: left;
+            padding: 10px 18px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-subtle);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .ledger-table td {
+            padding: 10px 18px;
+            border-bottom: 1px solid var(--border);
+            color: var(--fg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .ledger-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .model-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--fg);
+        }
+
+        .cost-high { color: var(--error); font-weight: 600; }
+        .cost-med { color: var(--warn); font-weight: 600; }
+        .cost-low { color: var(--success); font-weight: 600; }
+
+        @media (max-width: 860px) {
+            .metrics-strip { grid-template-columns: repeat(2, 1fr); }
+            .pipeline-steps { grid-template-columns: 1fr; }
+            .workspace-grid { grid-template-columns: 1fr; }
+            .scenario-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <div class="brand-group">
+            <div class="brand-mark">TCG</div>
+            <a href="/" class="brand-title">Token Cost Guard</a>
+            <span class="brand-badge">Phase 1 Proxy</span>
+        </div>
+        <nav class="nav-actions">
+            <a href="/" class="nav-link active">Console</a>
+            <a href="/walkthrough" class="nav-link">Video Walkthrough</a>
+            <a href="/chat-demo" class="nav-link">Chat Demo</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="page-intro">
+        <h1 class="page-heading">Proxy Enforcement &amp; Token Ledger</h1>
+        <p class="page-description">Pre-execution token counting, budget threshold checking, rate limit enforcement, and cost ledger accounting for Anthropic Claude requests.</p>
+    </div>
+
+    <div class="metrics-strip">
+        <div class="metric-cell">
+            <div class="metric-label">Proxy Status</div>
+            <div class="metric-value" id="proxyStatus">Checking...</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-label">Input Tokens</div>
+            <div class="metric-value" id="tokenCount">-</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-label">Estimated Cost</div>
+            <div class="metric-value" id="estCost">-</div>
+        </div>
+        <div class="metric-cell">
+            <div class="metric-label">Daily Spend / Limit</div>
+            <div class="metric-value" id="budgetStatus">-</div>
+        </div>
+    </div>
+
+    <div class="pipeline-card">
+        <div class="pipeline-header">Request Pipeline Flow</div>
+        <div class="pipeline-steps">
+            <div class="pipeline-step">
+                <span class="step-num">01 INGEST</span>
+                <span class="step-text">Validate Key</span>
+                <span class="step-tag">Format &amp; Schema</span>
+            </div>
+            <div class="pipeline-step">
+                <span class="step-num">02 COUNT</span>
+                <span class="step-text">Count Tokens</span>
+                <span class="step-tag">count_tokens API</span>
+            </div>
+            <div class="pipeline-step">
+                <span class="step-num">03 ESTIMATE</span>
+                <span class="step-text">Lookup Pricing</span>
+                <span class="step-tag">Model Pricing Table</span>
+            </div>
+            <div class="pipeline-step">
+                <span class="step-num">04 AUDIT</span>
+                <span class="step-text">Check Budget</span>
+                <span class="step-tag">Daily Spend Limit</span>
+            </div>
+            <div class="pipeline-step">
+                <span class="step-num">05 DISPATCH</span>
+                <span class="step-text">Forward / Block</span>
+                <span class="step-tag">Ledger Recording</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="scenarios-card">
+        <div class="scenarios-header">Scenario Test Bench</div>
+        <div class="scenario-grid">
+            <button id="btnHealth" class="scenario-btn">Health Check</button>
+            <button id="btnAllowed" class="scenario-btn success">Allowed Request</button>
+            <button id="btnBlocked" class="scenario-btn danger">Over Budget (402)</button>
+            <button id="btnInvalid" class="scenario-btn warn">Invalid Key (401)</button>
+            <button id="btnFlood" class="scenario-btn warn">Rate Limit Flood (429)</button>
+        </div>
+    </div>
+
+    <div class="workspace-grid">
+        <div class="section-card">
+            <div class="section-card-header">
+                <span class="section-card-title">Configuration</span>
+            </div>
+            <div class="section-card-body">
+                <div class="form-group">
+                    <label for="proxyUrl">Proxy Endpoint</label>
+                    <input type="text" id="proxyUrl" value="http://localhost:8000/v1/messages">
+                </div>
+                <div class="form-group">
+                    <label for="apiKey">Anthropic API Key</label>
+                    <input type="password" id="apiKey" placeholder="sk-ant-api01-..." value="sk-ant-api01-demo-key-000000">
+                </div>
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <select id="model">
+                        <option value="claude-3-haiku-20240307">Claude 3 Haiku (cheapest)</option>
+                        <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
+                        <option value="claude-3-opus-20240229">Claude 3 Opus (most capable)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="maxTokens">Max Tokens</label>
+                    <input type="number" id="maxTokens" value="1024" min="1" max="128000">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-card-header">
+                <span class="section-card-title">Dispatch Request</span>
+            </div>
+            <div class="section-card-body">
+                <div class="form-group">
+                    <label for="systemPrompt">System Prompt (optional)</label>
+                    <textarea id="systemPrompt" placeholder="You are a helpful assistant..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="userMessage">User Prompt</label>
+                    <textarea id="userMessage" placeholder="Enter message payload...">Explain what a proxy server is.</textarea>
+                </div>
+                <button id="sendBtn" class="btn btn-primary">Send Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="response-container">
+        <div class="response-header">
+            <span class="response-title">Upstream / Proxy Response</span>
+            <span id="responseStatus" class="result-status">-</span>
+        </div>
+        <div class="response-body">
+            <pre id="responseBody">Waiting for request...</pre>
+        </div>
+    </div>
+
+    <div class="ledger-card">
+        <div class="ledger-header">
+            <span class="ledger-title">Transaction Ledger</span>
+        </div>
+        <table class="ledger-table" id="ledgerTable">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Model</th>
+                    <th>Input Tokens</th>
+                    <th>Est. Cost</th>
+                    <th>Resolution</th>
+                </tr>
+            </thead>
+            <tbody id="ledgerBody">
+                <tr><td colspan="5" style="color: var(--fg-subtle);">No transactions recorded. Run a scenario or dispatch a request.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+    const proxyUrlInput = document.getElementById('proxyUrl');
+    const apiKeyInput = document.getElementById('apiKey');
+    const modelSelect = document.getElementById('model');
+    const systemInput = document.getElementById('systemPrompt');
+    const messageInput = document.getElementById('userMessage');
+    const maxTokensInput = document.getElementById('maxTokens');
+    const sendBtn = document.getElementById('sendBtn');
+    const proxyStatus = document.getElementById('proxyStatus');
+    const tokenCount = document.getElementById('tokenCount');
+    const estCost = document.getElementById('estCost');
+    const budgetStatus = document.getElementById('budgetStatus');
+    const responseStatus = document.getElementById('responseStatus');
+    const responseBody = document.getElementById('responseBody');
+    const ledgerBody = document.getElementById('ledgerBody');
+
+    let ledgerEntries = [];
+
+    function addLedgerRow(entry) {
+        if (ledgerEntries.length === 0) {
+            ledgerBody.innerHTML = '';
+        }
+        ledgerEntries.push(entry);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.time}</td>
+            <td><span class="model-badge">${entry.model}</span></td>
+            <td>${entry.tokens}</td>
+            <td class="cost-${entry.costClass}">${entry.cost}</td>
+            <td>${entry.status}</td>
+        `;
+        ledgerBody.insertBefore(row, ledgerBody.firstChild);
+    }
+
+    function costClass(cost) {
+        if (cost >= 1) return 'high';
+        if (cost >= 0.01) return 'med';
+        return 'low';
+    }
+
+    function setBudgetFromHeaders(response) {
+        const est = response.headers.get('x-tcg-estimated-cost');
+        const spent = response.headers.get('x-tcg-spent-today');
+        const limit = response.headers.get('x-tcg-budget-limit');
+        if (est) estCost.textContent = formatCost(parseFloat(est));
+        if (spent !== null && limit) {
+            budgetStatus.textContent = `${formatCost(parseFloat(spent))} / $${parseFloat(limit).toFixed(2)}`;
+        }
+    }
+
+    async function handleProxyResponse(response, model) {
+        const responseText = await response.text();
+        try {
+            const data = JSON.parse(responseText);
+            responseBody.textContent = JSON.stringify(data, null, 2);
+        } catch {
+            responseBody.textContent = responseText || '(empty response)';
+        }
+        responseStatus.textContent = `${response.status} ${response.statusText || ''}`.trim();
+        responseStatus.className = `result-status status-${response.status === 200 ? 200 : response.status === 402 ? 402 : '4xx'}`;
+
+        setBudgetFromHeaders(response);
+
+        let tokens = '-';
+        const usageMatch = responseText.match(/"input_tokens":\s*(\d+)/);
+        if (usageMatch) tokens = parseInt(usageMatch[1]);
+        tokenCount.textContent = tokens;
+
+        let costVal = parseFloat(response.headers.get('x-tcg-estimated-cost'));
+        if (isNaN(costVal)) {
+            try {
+                const body = JSON.parse(responseText);
+                costVal = body.estimated_cost;
+            } catch (err) {}
+        }
+        addLedgerRow({
+            time: new Date().toLocaleTimeString(),
+            model: model || '-',
+            tokens: tokens,
+            cost: isNaN(costVal) ? '-' : formatCost(costVal),
+            costClass: isNaN(costVal) ? 'med' : costClass(costVal),
+            status: response.status === 200 ? 'FORWARDED' : response.status === 402 ? 'BLOCKED' : String(response.status),
+        });
+        return responseText;
+    }
+
+    async function postToProxy(body, apiKey) {
+        return fetch(proxyUrlInput.value, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey || apiKeyInput.value.trim()
+            },
+            body: JSON.stringify(body)
+        });
+    }
+
+    function baseRequest(model, maxTokens) {
+        const message = messageInput.value.trim() || 'Explain what a proxy server is.';
+        const system = systemInput.value.trim();
+        const request = { model: model, messages: [{ role: 'user', content: message }], max_tokens: maxTokens };
+        if (system) request.system = system;
+        return request;
+    }
+
+    async function checkProxyStatus() {
+        try {
+            const proxyUrl = proxyUrlInput.value.replace('/v1/messages', '/health');
+            const response = await fetch(proxyUrl);
+            if (response.ok) {
+                proxyStatus.textContent = 'Connected';
+                proxyStatus.style.color = 'var(--success)';
+            } else {
+                proxyStatus.textContent = 'Error';
+                proxyStatus.style.color = 'var(--error)';
+            }
+        } catch (e) {
+            proxyStatus.textContent = 'Not reachable';
+            proxyStatus.style.color = 'var(--error)';
+        }
+    }
+
+    function formatCost(cost) {
+        if (cost === 0) return '$0.000000';
+        if (cost < 0.001) return '$' + cost.toFixed(6);
+        if (cost < 0.01) return '$' + cost.toFixed(4);
+        return '$' + cost.toFixed(2);
+    }
+
+    sendBtn.addEventListener('click', async () => {
+        const proxyUrl = proxyUrlInput.value;
+        const apiKey = apiKeyInput.value.trim();
+        const model = modelSelect.value;
+        const system = systemInput.value.trim();
+        const userMessage = messageInput.value.trim();
+        const maxTokens = parseInt(maxTokensInput.value) || 1024;
+
+        if (!apiKey) {
+            alert('Please enter your Anthropic API key');
+            return;
+        }
+        if (!userMessage) {
+            alert('Please enter a user message');
+            return;
+        }
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Processing...';
+        responseBody.textContent = 'Counting tokens...';
+        responseStatus.textContent = '-';
+        responseStatus.className = 'result-status';
+
+        try {
+            const messages = userMessage.split('\n').filter(m => m.trim()).map(m => ({
+                role: 'user',
+                content: m.trim()
+            }));
+
+            const request = {
+                model: model,
+                messages: messages.slice(0, 1),
+                system: system || undefined,
+                max_tokens: maxTokens
+            };
+
+            const response = await postToProxy(request, apiKey);
+            await handleProxyResponse(response, model);
+
+        } catch (e) {
+            responseBody.textContent = 'Error: ' + e.message;
+            responseStatus.textContent = 'Error';
+            responseStatus.className = 'result-status status-4xx';
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Request';
+        }
+    });
+
+    document.getElementById('btnHealth').addEventListener('click', async () => {
+        const proxyUrl = proxyUrlInput.value.replace('/v1/messages', '/health');
+        try {
+            const response = await fetch(proxyUrl);
+            responseBody.textContent = JSON.stringify(await response.json(), null, 2);
+            responseStatus.textContent = `${response.status} OK`;
+            responseStatus.className = 'result-status status-200';
+        } catch (e) {
+            responseBody.textContent = 'Error: ' + e.message;
+            responseStatus.className = 'result-status status-4xx';
+        }
+    });
+
+    document.getElementById('btnAllowed').addEventListener('click', async () => {
+        responseStatus.textContent = '-';
+        responseStatus.className = 'result-status';
+        responseBody.textContent = 'Sending request through proxy...';
+        const response = await postToProxy(baseRequest('claude-3-haiku-20240307', 256));
+        await handleProxyResponse(response, 'claude-3-haiku-20240307');
+    });
+
+    document.getElementById('btnBlocked').addEventListener('click', async () => {
+        responseStatus.textContent = '-';
+        responseStatus.className = 'result-status';
+        responseBody.textContent = 'Requesting Claude 3 Opus with max_tokens=128000 (est. > $5/day)...';
+        const response = await postToProxy(baseRequest('claude-3-opus-20240229', 128000));
+        await handleProxyResponse(response, 'claude-3-opus-20240229');
+    });
+
+    document.getElementById('btnInvalid').addEventListener('click', async () => {
+        responseStatus.textContent = '-';
+        responseStatus.className = 'result-status';
+        responseBody.textContent = 'Sending request with malformed API key...';
+        const response = await postToProxy(baseRequest('claude-3-haiku-20240307', 256), 'sk-ant-not-a-real-key');
+        await handleProxyResponse(response, 'claude-3-haiku-20240307');
+    });
+
+    document.getElementById('btnFlood').addEventListener('click', async () => {
+        responseStatus.textContent = '-';
+        responseStatus.className = 'result-status';
+        responseBody.textContent = 'Firing 2 waves of 15 concurrent requests (burst limit: 20)...';
+        const counts = {};
+        const send = () => postToProxy(baseRequest('claude-3-haiku-20240307', 16))
+            .then(r => { counts[r.status] = (counts[r.status] || 0) + 1; })
+            .catch(() => { counts.err = (counts.err || 0) + 1; });
+        for (let wave = 0; wave < 2; wave++) {
+            await Promise.all(Array.from({ length: 15 }, send));
+        }
+        responseBody.textContent = 'Status codes returned:\n' + JSON.stringify(counts, null, 2);
+        const blocked429 = counts[429] || 0;
+        responseStatus.textContent = blocked429 > 0 ? `429 rate-limited x${blocked429}` : 'all allowed';
+        responseStatus.className = `result-status ${blocked429 > 0 ? 'status-402' : 'status-200'}`;
+        addLedgerRow({
+            time: new Date().toLocaleTimeString(),
+            model: 'flood x30',
+            tokens: '-',
+            cost: '-',
+            costClass: 'med',
+            status: blocked429 > 0 ? `429 x${blocked429}` : 'ALLOWED',
+        });
+    });
+
+    setInterval(checkProxyStatus, 5000);
+    checkProxyStatus();
+</script>
+</body>
+</html>

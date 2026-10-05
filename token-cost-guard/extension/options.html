@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token Cost Guard Settings</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card: #f8fafc;
+      --fg: #09090b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --accent: #09090b;
+      --ok: #15803d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+      padding: 24px 28px;
+      max-width: 560px;
+    }
+    h1 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin-bottom: 16px; }
+    h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
+    label { display: block; color: var(--fg); font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    input:focus { outline: none; border-color: var(--fg); }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .save {
+      margin-top: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .save:hover { opacity: 0.9; }
+    .saved { display: none; color: var(--ok); font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Token Cost Guard</h1>
+  <div class="subtitle">Extension Settings</div>
+
+  <section>
+    <h2>Polling</h2>
+    <label for="interval">Refresh interval (seconds)</label>
+    <input id="interval" type="number" min="1" max="60" step="1" value="5">
+    <div class="hint">How often the side panel fetches the proxy ledger.</div>
+  </section>
+
+  <button class="save" id="save">Save</button>
+  <div class="saved" id="saved">Saved. The side panel will pick this up on reload.</div>
+
+  <script src="options.js"></script>
+</body>
+</html>
